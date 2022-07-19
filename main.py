@@ -86,6 +86,8 @@ async def animate_ship(canvas, main_window, ship_frames, start_row=None, start_c
 
     global coroutines, obstacles, collided_obstacles, is_gameover
 
+    gun_invention_year = 2020
+
     rows_number, columns_number = canvas.getmaxyx()
     max_row, max_col = rows_number - 1, columns_number - 1
 
@@ -121,7 +123,7 @@ async def animate_ship(canvas, main_window, ship_frames, start_row=None, start_c
 
             draw_frame(canvas, row, col, frame)
 
-            if space_pressed:
+            if space_pressed and year>=gun_invention_year:
                 coroutines.append(
                     fire(canvas, row, col+ship_width/2, rows_speed=-1)
                 )

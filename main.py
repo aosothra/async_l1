@@ -32,6 +32,7 @@ collided_obstacles = []
 year = 1957
 is_gameover = False
 
+
 def load_asset_frames(dir, asset_name):
     '''Load frames of animatable ASCII asset.'''
 
@@ -94,7 +95,7 @@ async def animate_ship(canvas, main_window, ship_frames, start_row=None, start_c
     ship_height, ship_width = get_frame_size(ship_frames[0])
 
     row = (
-        max(BORDER_THICKNESS, min(max_row-ship_height, start_row)) if start_row 
+        max(BORDER_THICKNESS, min(max_row-ship_height, start_row)) if start_row
         else (rows_number-ship_height)//2
     )
     col = (
@@ -118,12 +119,12 @@ async def animate_ship(canvas, main_window, ship_frames, start_row=None, start_c
 
             row_speed, column_speed = update_speed(row_speed, column_speed, rows_direction, columns_direction)
 
-            row=max(BORDER_THICKNESS, min(max_row-ship_height, row+row_speed))
-            col=max(BORDER_THICKNESS, min(max_col-ship_width, col+column_speed))
+            row = max(BORDER_THICKNESS, min(max_row-ship_height, row+row_speed))
+            col = max(BORDER_THICKNESS, min(max_col-ship_width, col+column_speed))
 
             draw_frame(canvas, row, col, frame)
 
-            if space_pressed and year>=gun_invention_year:
+            if space_pressed and year >= gun_invention_year:
                 coroutines.append(
                     fire(canvas, row, col+ship_width/2, rows_speed=-1)
                 )
@@ -142,7 +143,6 @@ async def show_gameover(canvas):
             draw_frame(canvas, rows_number/2-row_size/2+1, columns_number/2-column_size/2, frame)
             await asyncio.sleep(0)
             draw_frame(canvas, rows_number/2-row_size/2+1, columns_number/2-column_size/2, frame, negative=True)
-            
 
 
 async def fire(canvas, start_row, start_column, rows_speed=-0.3, columns_speed=0):
@@ -188,9 +188,8 @@ async def blink(canvas, row, column, symbol='*'):
     await sleep(random.randint(1, 10))
 
     while True:
-        
         canvas.addstr(row, column, symbol, curses.A_DIM)
-        await sleep(8) 
+        await sleep(8)
 
         canvas.addstr(row, column, symbol)
         await asyncio.sleep(0)
@@ -224,7 +223,7 @@ async def fly_garbage(canvas, column, garbage_frame, obstacle, speed=0.5):
         draw_frame(canvas, row, column, garbage_frame, negative=True)
         row += speed
         obstacle.row = row
-    
+
     obstacles.remove(obstacle)
     await explode(canvas, row+row_size/2, column+column_size/2)
 
@@ -282,11 +281,11 @@ async def update_year(canvas):
     while True:
         if is_gameover:
             return
-        year+=1
-        if phrase:=PHRASES.get(year):
-            panel_text= f'{year}: {phrase}'
+        year += 1
+        if phrase := PHRASES.get(year):
+            panel_text = f'{year}: {phrase}'
         else:
-            panel_text= f'{year}'
+            panel_text = f'{year}'
         canvas.erase()
         canvas.addstr(1, int(columns_number/2-len(panel_text)/2), panel_text, curses.A_DIM)
         await sleep(30)
@@ -299,8 +298,7 @@ def draw(canvas):
 
     num_starts = 100
     rows_number, columns_number = canvas.getmaxyx()
-    max_row, max_col = rows_number - 1, columns_number - 1
-    panel_rows = 3   
+    panel_rows = 3
 
     canvas.nodelay(True)
     display = canvas.derwin(rows_number-panel_rows, columns_number, 0, 0)
@@ -330,19 +328,19 @@ def draw(canvas):
         update_year(panel)
     )
 
-    # Main event loop    
+    # Main event loop
     while True:
         for coroutine in coroutines.copy():
             try:
                 coroutine.send(None)
             except StopIteration:
                 coroutines.remove(coroutine)
-        
+
         display.border()
         display.refresh()
         panel.border()
         panel.refresh()
-        
+
         time.sleep(TIC_TIMEOUT)
 
 

@@ -14,7 +14,6 @@ from obstacles import Obstacle, show_obstacles
 TIC_TIMEOUT = 0.1
 BORDER_THICKNESS = 1
 PHRASES = {
-    # Только на английском, Repl.it ломается на кириллице
     1957: "First Sputnik",
     1961: "Gagarin flew!",
     1969: "Armstrong got on the moon!",
@@ -29,6 +28,7 @@ PHRASES = {
 coroutines = []
 obstacles = []
 collided_obstacles = []
+assets = dict()
 year = 1957
 is_gameover = False
 
@@ -82,10 +82,11 @@ async def sleep(seconds=1):
         await asyncio.sleep(0)
 
 
-async def animate_ship(canvas, main_window, ship_frames, start_row=None, start_column=None, speed=1):
+async def animate_ship(canvas, main_window, start_row=None, start_column=None, speed=1):
     '''Display controlable player ship, terminal movement speed can be changed.'''
+    global coroutines, assets, obstacles, collided_obstacles, is_gameover
 
-    global coroutines, obstacles, collided_obstacles, is_gameover
+    ship_frames = assets['ship_frames']
 
     gun_invention_year = 2020
 
@@ -134,7 +135,10 @@ async def animate_ship(canvas, main_window, ship_frames, start_row=None, start_c
 
 async def show_gameover(canvas):
     '''Displays animated GAME OVER message'''
-    gameover_frames = load_asset_frames('animations', 'gameover')
+    global assets
+
+    gameover_frames = assets['gameover_frames']
+
     rows_number, columns_number = canvas.getmaxyx()
 
     while True:
@@ -228,9 +232,12 @@ async def fly_garbage(canvas, column, garbage_frame, obstacle, speed=0.5):
     await explode(canvas, row+row_size/2, column+column_size/2)
 
 
-async def fill_orbit_with_garbage(canvas, garbage_sprites):
+async def fill_orbit_with_garbage(canvas):
     '''Periodicaly create garbage entities'''
-    global obstacles, year
+    global assets, obstacles, year
+
+    garbage_sprites = assets['garbage_sprites']
+
     rows_number, columns_number = canvas.getmaxyx()
 
     while True:
@@ -257,8 +264,9 @@ async def fill_orbit_with_garbage(canvas, garbage_sprites):
 
 async def explode(canvas, center_row, center_column):
     '''Draw explosion animation'''
+    global assets
 
-    explosion_frames = load_asset_frames('animations', 'explosion')
+    explosion_frames = assets['explosion_frames']
     rows, columns = get_frame_size(explosion_frames[0])
     corner_row = center_row - rows / 2
     corner_column = center_column - columns / 2
@@ -294,7 +302,7 @@ async def update_year(canvas):
 def draw(canvas):
     curses.curs_set(False)
 
-    global coroutines, obstacles, collided_obstacles
+    global coroutines, assets, obstacles, collided_obstacles
 
     num_starts = 100
     rows_number, columns_number = canvas.getmaxyx()
@@ -306,23 +314,25 @@ def draw(canvas):
 
     panel = canvas.derwin(panel_rows, columns_number, rows_number-panel_rows, 0)
 
-    ship_frames = load_asset_frames('animations', 'rocket')
-    garbage_sprites = load_asset_sprite_collection('sprites/garbage')
+    assets['ship_frames'] = load_asset_frames('animations', 'rocket')
+    assets['gameover_frames'] = load_asset_frames('animations', 'gameover')
+    assets['explosion_frames'] = load_asset_frames('animations', 'explosion')
+    assets['garbage_sprites'] = load_asset_sprite_collection('sprites/garbage')
 
     coroutines = [
         blink(
-            display, 
-            row=random.randint(BORDER_THICKNESS, display_rows-BORDER_THICKNESS), 
+            display,
+            row=random.randint(BORDER_THICKNESS, display_rows-BORDER_THICKNESS),
             column=random.randint(BORDER_THICKNESS, display_columns-BORDER_THICKNESS),
             symbol=random.choice('.:*+\'')
-            ) 
+            )
         for _ in range(num_starts)
     ]
     coroutines.append(
-        fill_orbit_with_garbage(display, garbage_sprites)
+        fill_orbit_with_garbage(display)
     )
     coroutines.append(
-        animate_ship(display, canvas, ship_frames, speed=2)
+        animate_ship(display, canvas, speed=2)
     )
     coroutines.append(
         update_year(panel)

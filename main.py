@@ -185,11 +185,11 @@ async def fire(canvas, start_row, start_column, rows_speed=-0.3, columns_speed=0
         column += columns_speed
 
 
-async def blink(canvas, row, column, symbol='*'):
+async def blink(canvas, row, column, symbol='*', offset_tics=10):
     '''Display animation of blinking star, star representation can be changed.'''
 
     canvas.addstr(row, column, symbol, curses.A_DIM)
-    await sleep(random.randint(1, 10))
+    await sleep(offset_tics)
 
     while True:
         canvas.addstr(row, column, symbol, curses.A_DIM)
@@ -324,7 +324,8 @@ def draw(canvas):
             display,
             row=random.randint(BORDER_THICKNESS, display_rows-BORDER_THICKNESS),
             column=random.randint(BORDER_THICKNESS, display_columns-BORDER_THICKNESS),
-            symbol=random.choice('.:*+\'')
+            symbol=random.choice('.:*+\''),
+            offset_tics=random.randint(1, 10)
             )
         for _ in range(num_starts)
     ]

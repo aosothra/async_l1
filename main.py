@@ -74,7 +74,7 @@ def get_garbage_delay_tics(year):
         return 2
 
 
-async def slumber(seconds=1):
+async def sleep(seconds=1):
     '''Delay coroutine execution by specified time'''
 
     for _ in range(seconds):
@@ -185,22 +185,22 @@ async def blink(canvas, row, column, symbol='*'):
     '''Display animation of blinking star, star representation can be changed.'''
 
     canvas.addstr(row, column, symbol, curses.A_DIM)
-    await slumber(random.randint(1, 10))
+    await sleep(random.randint(1, 10))
 
     while True:
         
         canvas.addstr(row, column, symbol, curses.A_DIM)
-        await slumber(8) 
+        await sleep(8) 
 
         canvas.addstr(row, column, symbol)
         await asyncio.sleep(0)
 
         canvas.addstr(row, column, symbol, curses.A_BOLD)
-        await slumber(6)
+        await sleep(6)
 
         for _ in range(4):
             canvas.addstr(row, column, symbol)
-        await slumber(4)
+        await sleep(4)
 
 
 async def fly_garbage(canvas, column, garbage_frame, obstacle, speed=0.5):
@@ -239,7 +239,7 @@ async def fill_orbit_with_garbage(canvas, garbage_sprites):
         if is_gameover:
             return
         if not delay:
-            await slumber()
+            await sleep()
         else:
             sprite = random.choice(list(garbage_sprites.values()))
             column = random.randint(0, columns_number)
@@ -253,7 +253,7 @@ async def fill_orbit_with_garbage(canvas, garbage_sprites):
                 fly_garbage(canvas, column, sprite, obstacle)
             )
 
-            await slumber(delay)
+            await sleep(delay)
 
 
 async def explode(canvas, center_row, center_column):
@@ -289,7 +289,7 @@ async def update_year(canvas):
             panel_text= f'{year}'
         canvas.erase()
         canvas.addstr(1, int(columns_number/2-len(panel_text)/2), panel_text, curses.A_DIM)
-        await slumber(30)
+        await sleep(30)
 
 
 def draw(canvas):
